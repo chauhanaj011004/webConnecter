@@ -1,4 +1,5 @@
 const express = require("express");
+const {authAdmin} = require("./middleware/auth")
 
 const app = express();
 // app.use("/hello",(req,res)=>{
@@ -18,23 +19,16 @@ const app = express();
 //     console.log(req.params);
 // })
 
-app.use(
-  "/user",
-  (req, res, next) => {
-    console.log("Hello this is  console of 1st route");
-    // res.send("Response  -> 1st !!")
-    next();
-  },
-  (req, res, next) => {
-    console.log("Hello this is  console of 2nd route");
-    // res.send("Response  -> 2nd !!");
-    next();
-  },
-  (req, res) => {
-    console.log("Hello this is  console of 3rdwa route");
-    res.send("Response  -> 3rd !!");
-  },
-);
+app.get("/admin",authAdmin,(req,res)=>{
+    console.log("admin data send in console");
+    res.send("User data sent through ,response!")
+
+})
+app.post("/admin",authAdmin,(req,res)=>{
+    console.log("admin post some data consolq!");
+
+    res.send("Response:Admin post data");
+})
 
 app.listen(777, () => {
   console.log("App is running on port number 777");
