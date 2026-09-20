@@ -31,7 +31,7 @@ app.use(
     next();
   },
   (req, res) => {
-    console.log("Hello this is  console of 3rd route");
+    console.log("Hello this is  console of 3rdwa route");
     res.send("Response  -> 3rd !!");
   },
 );
