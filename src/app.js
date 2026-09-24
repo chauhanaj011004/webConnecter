@@ -53,7 +53,32 @@ app.get("/UserById" ,async (req,res)=>{
   const userDetail=await User.findById(userId);
   res.send(userDetail);
 })
-
+//delete
+app.delete("/deleteUser", async (req,res)=>{
+  try{
+    const user = await User.findByIdAndDelete(req.body.id);
+    if (!user) {
+      return res.status(404).send("User not found or already deleted");
+    }
+    res.send("User deleted sucessfully")
+  }
+  catch(error)
+  {
+    res.send("Error while Deteting user");
+  }
+})
+//update user 
+app.put("/update", async (req,res)=>{
+  try{
+  const user = await User.findByIdAndUpdate(req.body.id,{firstName:"Vijay",lastName:"Singh Chauhan"},{ returnDocument: "after"});
+  console.log("User Updated sucessfully");
+  res.send("User  uupdated successfully Done !!")
+  }
+  catch(error)
+  {
+    res.send("eroor while updating user")
+  }
+})
 dbConnect()
   .then(() => {
     console.log("db connected sucessfully!");
