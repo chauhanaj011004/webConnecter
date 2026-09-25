@@ -2,21 +2,57 @@ const express = require("express");
 const { dbConnect } = require("./config/database");
 const app = express();
 const User = require("./model/user");
-
+const { validateSignup } = require("./utill/signupValidation");
+const bcrypt = require("bcrypt");
 app.use(express.json());
+
+app.post("/login", async (req, res) => {
+  try {
+    const { emailId, password } = req.body;
+
+    //check email exist or not
+    const user =await User.findOne({ emailId: emailId });
+    if (!user) {
+      throw new Error("Invalid Cradential!");
+    }
+    const isPasswordValid = await bcrypt.compare(password,user.password);
+
+    if (isPasswordValid) {
+      res.send("User login successfully!!");
+
+    } else {
+      throw new Error("Invalid Cradentail!");
+    }
+  } catch (error) {
+    return res.status(500).json({
+      success: false,
+      message: "Can't create user please try again!",
+      massageError: error.message,
+    });
+  }
+});
 
 app.post("/signup", async (req, res) => {
   try {
-    const userwa = new User({
-      firstName: "Ajay1",
-      lastName: "Chauhanq",
-      // emailId: "aassjay@gmail211.com",
-      password: "dwfdwfgewghrhg",
-      gender: "Malebv",
-      age: "21",
-      phoneNumber: "1234567890b",
+    const { firstName, lastName, emailId, password, gender, age, phoneNumber } =
+      req.body;
+
+    //Validate the data
+    validateSignup(req);
+
+    const hashedPassword = await bcrypt.hash(password, 11);
+
+    const user = new User({
+      firstName: firstName,
+      lastName: lastName,
+      emailId: emailId,
+      password: hashedPassword,
+      gender: gender,
+      age: age,
+      phoneNumber: phoneNumber,
     });
-    await userwa.save();
+
+    await user.save();
     res.send("User added sucessfuilly!");
   } catch (error) {
     return res.status(500).json({
@@ -44,41 +80,41 @@ app.get("/getUserOne", async (req, res) => {
 });
 
 app.get("/allUsers", async (req, res) => {
-   const userDetails= await User.find({});
-   res.send(userDetails);
+  const userDetails = await User.find({});
+  res.send(userDetails);
 });
 
-app.get("/UserById" ,async (req,res)=>{
-  const userId = req.body.id
-  const userDetail=await User.findById(userId);
+app.get("/UserById", async (req, res) => {
+  const userId = req.body.id;
+  const userDetail = await User.findById(userId);
   res.send(userDetail);
-})
+});
 //delete
-app.delete("/deleteUser", async (req,res)=>{
-  try{
+app.delete("/deleteUser", async (req, res) => {
+  try {
     const user = await User.findByIdAndDelete(req.body.id);
     if (!user) {
       return res.status(404).send("User not found or already deleted");
     }
-    res.send("User deleted sucessfully")
-  }
-  catch(error)
-  {
+    res.send("User deleted sucessfully");
+  } catch (error) {
     res.send("Error while Deteting user");
   }
-})
-//update user 
-app.put("/update", async (req,res)=>{
-  try{
-  const user = await User.findByIdAndUpdate(req.body.id,{firstName:"Vijay",lastName:"Singh Chauhan"},{ returnDocument: "after"});
-  console.log("User Updated sucessfully");
-  res.send("User  uupdated successfully Done !!")
+});
+//update user
+app.put("/update", async (req, res) => {
+  try {
+    const user = await User.findByIdAndUpdate(
+      req.body.id,
+      { firstName: "Vijay", lastName: "Singh Chauhan" },
+      { returnDocument: "after" },
+    );
+    console.log("User Updated sucessfully");
+    res.send("User  uupdated successfully Done !!");
+  } catch (error) {
+    res.send("eroor while updating user");
   }
-  catch(error)
-  {
-    res.send("eroor while updating user")
-  }
-})
+});
 dbConnect()
   .then(() => {
     console.log("db connected sucessfully!");
